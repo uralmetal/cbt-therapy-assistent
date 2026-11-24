@@ -138,3 +138,35 @@ Walkthrough исправленного текста, не тест прилож�
 На уровне текста маршруты предусмотрены; необходимы реальные smoke/negative tests из Render после доступа и согласования. Q07 стал CONDITIONAL, Q11 добавлен как условный выбор конкретного сервиса, Q08/Q09 остаются BLOCKED, Q10 DEFERRED, 2 READY/6 CONDITIONAL/2 BLOCKED/1 DEFERRED. Все семь ADR Proposed. AR-06 технический Mermaid-рендер остаётся OPEN (новые диаграммы смыслово сверены; ранее рендер блокировался средой). 
 
 **Необходимость повторного независимого ревью: REQUIRED.** Изменились драйверы, доверительные границы, состояние/хранение, модель конкурентности и выбранные кандидаты UI/LLM. Предмет: все затронутые ADR 0001–0007, R10–R14, Q07/Q11, C-W01–10 и W1–W19, в особенности устойчивость safety/SaveUncertain и политика данных. Вердикт автора: READY_WITH_OPEN_QUESTIONS для повторного независимого ревью, не для реализации/приёмки. Gate BLOCKED. Merge, принятие ADR, закрытие комментариев и изменение Discovery не выполнялись.
+
+---
+
+## Обработка комментариев заказчика — согласование решений (C-07–C-14)
+
+24.11.2026 · входной HEAD `a1b6d2ee01ea71ea8ef8432989c22297a52e0f34` · Discovery `fb43439ccfa0a88e5128e397326ed77abc91d2b4`. Проверены Conversation, все 18 тредов, Issue #1 (нового решения UX нет); предыдущие C-01–C-06 охвачены [отчётом](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#issuecomment-7126325896), новых требований сверх восьми найденных комментариев нет. [Ревью №3](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#issuecomment-7125875871) подтверждало ARCH-R-001–005 на прежнем SHA ff5612e, не на текущей конфигурации. Предыдущее саморевью и статусы выше исторические.
+
+| ID | Тип | Результат |
+|---|---|---|
+| [C-07](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677547656) | Решение | ADR-0001 Accepted, вариант C |
+| [C-08](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677555132) | Решение | ADR-0002 Accepted, внешний транзакционный state |
+| [C-09](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677564411) | Решение | ADR-0003 Accepted, узкий адаптер |
+| [C-10](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677582500) | Решение + требование | ADR-0004 Accepted, Supabase; отдельный Render Postgres stage/demo, 30-дневное ограничение Free и раздельные окружения; ChatGPT App/MCP только потенциальное инженерное средство |
+| [C-11](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677592508) | Решение | ADR-0005 Accepted, отдельный safety-шлюз/блокировка |
+| [C-12](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677587205) | Решение | ADR-0006 Accepted, Telegram; UX отдельно |
+| [C-13](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677650454) | Предложение выбора + ограничение | Согласен с Gemini для ДЗ; ADR-0007 Proposed в части модели и условий, Flash-Lite кандидат. Не утверждаю бесплатность или реальный профиль; R15, Q07/Q09 |
+| [C-14](https://github.com/uralmetal/cbt-therapy-assistent/pull/3#discussion_r4677672823) | Требование к схеме | Оба аналитических блока и стрелки убраны, отдельный runtime-контур исключён из MVP-предложения. Согласен не включать аналитику сейчас, не согласен трактовать удаление блоков как снятие требований приватности; R14 остаётся будущей возможностью |
+
+### Проверка регрессий после выбора
+
+Документальный walkthrough, не тест приложения. W1–W19 и C-W01–C-W10 сохраняются: авторство, один эпизод на авторизованного субъекта, immutable Save/SaveUncertain, отдельный учёт safety-only, независимые результаты и токены, транзакции и рестарт, запрет обычной обработки при недоступной БД. Ни один из этих механизмов не зависит от замены Groq на Gemini или исключения аналитики. C-W08 уточнён: в текущем MVP аналитический доступ вообще отсутствует; прежний read-only сценарий применим только при отдельном согласовании будущего контура.
+
+| ID | Сценарий | Ожидаемый результат по тексту |
+|---|---|---|
+| D-W01 | Выбран Telegram/Supabase, рестарт/повтор webhook/конкуренция | Тот же внешний транзакционный контракт, не локальная сессия; W1–W19/C-W01–07/10 без ослабления |
+| D-W02 | Stage использует Render Postgres, основная БД Supabase | Разные подключения/секреты/синтетические fixtures; те же миграции и инварианты; никакого автоматического failover или копии пользовательских данных. Free истекает через 30 дней, демо перепроверяется до срока |
+| D-W03 | Gemini структурированный ответ, ложная метка или поздний результат | Независимая валидация происхождения и актуальности; safety-ответ применяется к конкретному ID/токену, не требует Clear; обычный ответ требует Clear |
+| D-W04 | Gemini 429/503 или блокировка контента, B нерешён | Нет отрицательного результата, Clear/Save запрещены, статическая помощь; не обходить настройки безопасности и не пересылать другим провайдерам автоматически |
+| D-W05 | Попытка использовать реальный дневник, личный текст или недопустимый регион | Учебный профиль не разрешает передачу, не выпускать для такого использования до отдельного решения/проверки условий; подтверждение доступных регионов и фактических прав остаётся Q09 |
+| D-W06 | Запрос аналитики/CSV/MCP к пользовательским данным | В текущем MVP нет аналитического маршрута и прав доступа; потенциальный инженерный MCP только на отдельном синтетическом проекте после разрешения, не источник бизнес-состояния |
+
+Проверены актуальные официальные [Gemini model](https://aistudio.google.com/docs/models/gemini-3.5-flash-lite), [pricing](https://aistudio.google.com/docs/pricing#gemini-3.5-flash-lite), [rate limits](https://aistudio.google.com/docs/rate-limits), [terms](https://aistudio.google.com/docs/terms), [Render Free](https://render.com/docs/free), [Supabase ChatGPT App](https://supabase.com/blog/supabase-is-now-an-official-chatgpt-app), [Supabase MCP](https://supabase.com/docs/guides/ai-tools/mcp) 24.11.2026. Реальные аккаунты, код, внешние API и Mermaid-рендер не проверены. Q01/Q02 READY, Q03–Q07/Q11 CONDITIONAL, Q08/Q09 BLOCKED, Q10 DEFERRED. Planning Readiness Gate BLOCKED. Шесть ADR Accepted только по явным комментариям; ADR-0007 Proposed с зафиксированным направлением Gemini. Независимое ревью REQUIRED (предыдущая конфигурация с новым state ещё не проверена, плюс смена LLM/границы аналитики). Не закрываем треды, не отправляем pending review заказчика, не выполняем merge.
