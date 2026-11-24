@@ -6,7 +6,7 @@
 |---|---|
 | [Readiness](architecture-readiness.md) | Требования, комментарии заказчика, вопросы и готовность |
 | [Overview](architecture-overview.md) | Предлагаемая конфигурация, границы и жизненный цикл |
-| [Реестр ADR](decisions/README.md) | Семь предложений и открытые вопросы |
+| [Реестр ADR](decisions/README.md) | Шесть принятых ADR, один Proposed и открытые вопросы |
 | [Ревью](architecture-review.md) | История независимых ревью, обработка комментариев, проверки |
 
 Независимое ревью №3 на `ff5612e0c483e01f4a2fea039307aeef19404e19` подтвердило 5/5 прежних замечаний FIXED. Актуальные решения и ограничение Gemini требуют повторного независимого ревью; AR-06 OPEN. Planning Readiness Gate: BLOCKED.
