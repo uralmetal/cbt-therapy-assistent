@@ -8,7 +8,7 @@
 
 ## 1. Общая стартовая версия
 
-После согласования и merge [PR #2](https://github.com/uralmetal/cbt-therapy-assistent/pull/2) A создаёт общую интеграционную ветку с актуальной версии `main`.
+Стартовый скелет уже в `main` после [PR #2](https://github.com/uralmetal/cbt-therapy-assistent/pull/2). Разработчик A создаёт общую интеграционную ветку с актуальной версии `main`.
 
 ```bash
 git clone https://github.com/uralmetal/cbt-therapy-assistent.git
